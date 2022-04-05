@@ -76,19 +76,13 @@ class Tulpar:
 
             else:
 
-                # This takes the filename and creates a classname
-                # from it. An example is `test_page.py` would be `TestPage`
-                # This also enforces that consistent style I wanted.
-                page_cls = "".join(map(str.capitalize, module[:-3].split("_")))
-
                 module_path = route_prefix[1:].replace("/", ".")
 
                 # This complex piece of code instantiates the
-                # aforementioned page class and assigns page to
-                # the new object.
+                # page class and assigns page to the new object.
                 page = getattr(
                     import_module(f"{module_path}{module[:-3]}"),
-                    page_cls,
+                    module[:-3],
                 )()
 
                 # This handles the case of an index page

@@ -10,24 +10,13 @@ API Resource Decorator
 from dataclasses import dataclass
 from re import compile as re_compile
 from typing import Any, Callable, Dict, Generic, List, Optional, Type, TypedDict, TypeVar
+from .base_decorator import Dependency, BaseDecorator
 
 from .protocols.resource import ResourceT
 
 # Generic Type Variable
 
 _T = TypeVar("_T")
-
-
-class Dependency(TypedDict):
-    """Dependency Type for use in Dependency Injection
-
-    This dictionary type represents what a dependency could look like
-    for Blink.
-    """
-
-    dependency: Callable
-    dependency_params: Optional[Dict[str, Any] | List[Any]]
-
 
 @dataclass(frozen=True)
 class ResourceType(Generic[_T]):
@@ -44,7 +33,7 @@ class ResourceType(Generic[_T]):
     obj: _T
 
 
-class Resource:
+class Resource(BaseDecorator):
     """Resource Decorator
 
     Each API falcon resource should be decorated with
@@ -64,18 +53,9 @@ class Resource:
     def __init__(
         self, route: str, dependencies: Optional[List[Dependency]] = None
     ) -> None:
+        super().__init__(dependencies)
         self.dependencies = dependencies or []
         self.route = route
-        self.camel_to_snake_pattern = re_compile(r"(?<!^)(?=[A-Z])")
-
-    def camel_case_to_snake(self, camel_case: str) -> str:
-        """Transform a CamelCase string to snake_case.
-
-        Given a valid string, return the lowered, snake_case
-        version of that string.
-        """
-
-        return self.camel_to_snake_pattern.sub("_", camel_case).lower()
 
     def __call__(self, resource_cls: Type[ResourceT]) -> ResourceType[ResourceT]:
 
@@ -84,18 +64,10 @@ class Resource:
         # Resource("/test")(Test)
         # Which is what happens with the decorator
 
-        initialized_dependencies: Dict[str, Any] = {}
-        for dep in self.dependencies:
-                if isinstance(dep["dependency_params"], list):
-                    initialized_dependencies |= {self.camel_case_to_snake(dep["dependency"].__name__): dep["dependency"](*dep["dependency_params"])}
-                if isinstance(dep["dependency_params"], dict):
-                    initialized_dependencies |= {self.camel_case_to_snake(dep["dependency"].__name__): dep["dependency"](**dep["dependency_params"])}
-                else:
-                    initialized_dependencies |= {self.camel_case_to_snake(dep["dependency"].__name__): dep["dependency"]()}
 
         obj = (
-            resource_cls(**initialized_dependencies)  # type: ignore
-            if len(initialized_dependencies)
+            resource_cls(**self.initialize_dependencies())  # type: ignore
+            if len(self.initialize_dependencies())
             else resource_cls()
         )
         return ResourceType(self.route, obj)
