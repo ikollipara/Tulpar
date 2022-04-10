@@ -8,15 +8,18 @@ API Resource Decorator
 
 # Imports
 from dataclasses import dataclass
-from re import compile as re_compile
-from typing import Any, Callable, Dict, Generic, List, Optional, Type, TypedDict, TypeVar
-from .base_decorator import Dependency, BaseDecorator
+from inspect import getmembers, isfunction
+from typing import Generic, List, Optional, Type, TypeVar
 
+from falcon import Request, Response
+
+from .base_decorator import BaseDecorator, Dependency
 from .protocols.resource import ResourceT
 
 # Generic Type Variable
 
 _T = TypeVar("_T")
+
 
 @dataclass(frozen=True)
 class ResourceType(Generic[_T]):
@@ -59,12 +62,22 @@ class Resource(BaseDecorator):
 
     def __call__(self, resource_cls: Type[ResourceT]) -> ResourceType[ResourceT]:
 
+        # Given our methods return HTML, we need to wrap them in a way
+        # that Falcon can handle, which means the res.text attribute
+        # is set to the result of our method
+        for method_name, method in filter(
+            lambda method: method[0][:2] == "on", getmembers(resource_cls, isfunction)
+        ):
+
+            def _wrapper(base: ResourceT, req: Request, res: Response, *args):
+                res.text = method(base, req, res, *args)
+
+            setattr(resource_cls, method_name, _wrapper)
+
         # The main idea here is what happens when the
         # resource class is called, such as
         # Resource("/test")(Test)
         # Which is what happens with the decorator
-
-
         obj = (
             resource_cls(**self.initialize_dependencies())  # type: ignore
             if len(self.initialize_dependencies())

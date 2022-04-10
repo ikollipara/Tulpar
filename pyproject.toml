@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tulpar"
-version = "0.0.2"
+version = "0.0.3"
 description = "A Python SSR Framework built on Falcon, PonyORM, and HTMX"
 authors = ["Ian Kollipara <ian.kollipara@cune.org>"]
 license = "MIT"

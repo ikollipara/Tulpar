@@ -8,8 +8,11 @@ Tulpar Applications should be initialized with the Tulpar CLI.
 """
 
 # Exports
+from falcon import Request, Response
+
 from .config import TulparConfig
 from .middleware import TulparMiddleware
+from .model import Model
 from .page import Page
 from .resource import Resource
 from .tulpar import Tulpar, render

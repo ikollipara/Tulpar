@@ -8,6 +8,7 @@ Blink Config
 
 # Imports
 from dataclasses import dataclass
+from os import getcwd
 from typing import List, Literal, Tuple, TypedDict
 
 from .middleware import TulparMiddleware
@@ -84,3 +85,18 @@ class TulparConfig:
     app_name: str
     db_params: DB_PARAMS
     middleware: List[TulparMiddleware]
+
+    def __call__(self) -> "TulparConfig":
+        """Adjust the Config in case of SQLite Database.
+
+        If a SQLite DB is used, adjust the filename to create the db
+        in the user directory.
+        """
+
+        if (
+            self.db_params[0] == "sqlite"
+            and self.db_params[1].get("filename", "")[0] != ":"
+        ):
+            self.db_params[1]["filename"] = f"{getcwd()}/{self.db_params[1].get('filename')}"  # type: ignore
+
+        return self
