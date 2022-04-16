@@ -13,3 +13,12 @@ I've been thinking that pages would be well served by being just a render functi
 
 ## 2022.04.05
 I've finished documenting what is currently in the framework. My next concern is where I should include service files, or should I have those at all. I think having a dedicated folder would be nice for services, as some things just don't belong in the view parts of the function. It also allows for some DRY principles as well. 
+
+
+## 2022.04.16
+I've looked at the framework, and although it's functional I want to do more. As such, the next version of Tulpar is being built after this.
+
+I've reconsidered my uses, and I'm debating using Returns as a building block. I like functional
+code, it's easier to test and check. As such, I think this project would benefit from that new direction. In addition to this, I want to offically use a HTML DSL. I also want to hand roll it,
+so that HTMX can be deeply ingrained. Lastly, I want to do something more for the database part,
+potentially introduce more options. 
