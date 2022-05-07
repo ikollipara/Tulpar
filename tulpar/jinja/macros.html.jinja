@@ -1,0 +1,16 @@
+{# 
+    page macro is used for denoting a page in Tulpar.
+    In particular, it manages creating an anchor tag
+    setup to replace the main page with the new page.
+    It also pushes history, to give the true appearance.
+
+    It uses caller to allow abritary elements inside the
+    anchor tag, such as a button or headings.
+ #}
+{% macro page(url) -%}
+    <a hx-get={{ url }} hx-target="#app" hx-push-url="true">
+        {{ caller() }}
+    </a>
+{% endmacro %}
+
+{# TODO: Add Static Macro #}

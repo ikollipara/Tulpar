@@ -22,3 +22,20 @@ I've reconsidered my uses, and I'm debating using Returns as a building block. I
 code, it's easier to test and check. As such, I think this project would benefit from that new direction. In addition to this, I want to offically use a HTML DSL. I also want to hand roll it,
 so that HTMX can be deeply ingrained. Lastly, I want to do something more for the database part,
 potentially introduce more options. 
+
+### Plan of Action
+
+- [ ] Implement Jinja2 Extensions that add HTMX
+- [ ] Create Resources Decorator
+- [ ] Create Pages Decorator
+- [ ] Create Modular API design
+- [ ] Create Hook and Middleware Abstractions
+    - [ ] Create Middleware functions or better class interface
+- [ ] Write ORM Layer
+    - [ ] Create Better Model Wrapper
+    - [ ] Create Repos automatically (Maybe as the model?)
+    - [ ] Introduce some kind of Admin Page for creating models
+- [ ] Create HTML DSL
+    - [ ] Embed Jinja and HTMX functionality within the model
+    - [ ] Make it declarative
+    - [ ] (Optional) Find a way to make python functions work on the frontend (possibly transpiling?)

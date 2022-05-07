@@ -1,14 +1,19 @@
 """
-tulpar/config.py
+blink/config.py
 Ian Kollipara
-2022.04.19
+2022.03.31
 
-Tulpar Config Class Definition
+Blink Config
 """
 
 # Imports
-from functools import singledispatchmethod
-from typing import Any, List, TypedDict, Literal, Tuple
+from dataclasses import dataclass
+from os import getcwd
+from typing import List, Literal, Tuple, TypedDict
+
+from .middleware import TulparMiddleware
+
+
 class SQLiteParams(TypedDict):
     """SQLiteParams denotes the parameters
     needed for an SQLite PonyORM DB Connection.
@@ -70,44 +75,28 @@ DB_PARAMS = (
     | Tuple[Literal["cockroach"], CockroachParams]
 )
 
-class TulparConfig:
 
-    """ TulparConfig
-    
-    This class implements the builder pattern to set its attributes.
-    This is done via a context manager. These settings are used in
-    bootstrapping the Tulpar Application.
+@dataclass
+class TulparConfig:
+    """BlinkConfig is the base class for all configuration files
+    `config.py` *must* inherit from this class.
     """
 
-    def __init__(self) -> None:
-        self.app_name = ""
-        self.db_params: DB_PARAMS = ("sqlite", SQLiteParams(filename=":memory:", create_db=False))
-        self.middleware = []
-    
-    def set_app_name(self, app_name: str):
-        """ Set the App Name.
-        
-        Given an app name, set the name.
+    app_name: str
+    db_params: DB_PARAMS
+    middleware: List[TulparMiddleware]
+
+    def __call__(self) -> "TulparConfig":
+        """Adjust the Config in case of SQLite Database.
+
+        If a SQLite DB is used, adjust the filename to create the db
+        in the user directory.
         """
-        
-        self.app_name = app_name
-        return self
-    
-    def set_db_params(self, db_params: DB_PARAMS):
-        """ Set the Database Settings
-        
-        Set the Database Params.
-        """
-        
-        self.db_params = db_params
-        return self
-    
-    @singledispatchmethod
-    def add_middleware(self, middleware: Any):
-        self.middleware.append(middleware)
-        return self
-    
-    @add_middleware.register
-    def _(self, middleware: List[Any]):
-        self.middleware += middleware
+
+        if (
+            self.db_params[0] == "sqlite"
+            and self.db_params[1].get("filename", "")[0] != ":"
+        ):
+            self.db_params[1]["filename"] = f"{getcwd()}/{self.db_params[1].get('filename')}"  # type: ignore
+
         return self
